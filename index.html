@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>現場採寸カウンター</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+
+  :root{
+    --bg: #EEF1F6;
+    --card: #FFFFFF;
+    --card-border: #E1E5EE;
+    --ink: #1F2733;
+    --ink-soft: #7B8494;
+    --navy: #1B3358;
+    --navy-deep: #12233E;
+    --accent: #2E6DA4;
+    --accent-soft: #E7EFF7;
+    --good: #2E9E6C;
+    --shadow: 0 4px 16px rgba(18,35,62,0.08);
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+  html{ touch-action: manipulation; -ms-touch-action: manipulation; }
+
+  body{
+    margin:0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans JP', sans-serif;
+    padding-bottom: 60px;
+  }
+
+  header{
+    background: linear-gradient(135deg, var(--navy), var(--navy-deep));
+    padding: 20px 16px 18px;
+    border-radius: 0 0 20px 20px;
+    box-shadow: var(--shadow);
+  }
+  .kicker{
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 6px;
+  }
+  h1{
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    margin: 0 0 14px;
+    color: #fff;
+    letter-spacing: 0.01em;
+  }
+
+  .site-row{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  #siteName{
+    flex: 1;
+    min-width: 0;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #fff;
+  }
+  #siteName::placeholder{ color: rgba(255,255,255,0.55); font-weight: 400; }
+  #siteName:focus{ outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,0.25); }
+
+  .icon-btn{
+    flex: 0 0 auto;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+
+  .mode-toggle{
+    display: flex;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+  }
+  .mode-toggle button{
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mode-toggle button.active{
+    background: #fff;
+    color: var(--navy);
+  }
+
+  main{ padding: 14px 14px 0; max-width: 640px; margin: 0 auto; }
+
+  .section-title{
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    margin: 18px 4px 8px;
+  }
+
+  .slot{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .slot-head{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px 4px 12px;
+  }
+  .slot-num{
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--accent);
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .slot-head input{
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    padding: 13px 4px;
+  }
+  .slot-head input::placeholder{ color: var(--ink-soft); font-weight: 400; }
+  .slot-head input:focus{ outline: none; }
+
+  .slot-count-badge{
+    flex: 0 0 auto;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .del-btn{
+    flex: 0 0 auto;
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    border: none;
+    background: rgba(192,71,47,0.08);
+    color: #C0472F;
+    font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .expand-btn{
+    flex: 0 0 auto;
+    width: 46px; height: 46px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(31,39,51,0.07);
+    color: var(--ink);
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .expand-btn.open{
+    background: var(--accent);
+    color: #fff;
+    transform: rotate(180deg);
+  }
+
+  .panel{
+    display: none;
+    padding: 2px 12px 12px;
+    border-top: 1px solid var(--card-border);
+  }
+  .panel.open{ display: block; padding-top: 10px; }
+
+  .add-row{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .add-row input{
+    flex: 1;
+    min-width: 0;
+    border: 1.5px solid var(--card-border);
+    background: #FAFBFD;
+    border-radius: 10px;
+    padding: 14px 12px;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+  }
+  .add-row input:focus{ outline: none; border-color: var(--accent); }
+  .add-row button{
+    flex: 0 0 84px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  
+  .piece-inputs {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .piece-inputs input {
+    font-size: 16px;
+    padding: 14px 6px;
+  }
+
+  .size-item{
+    display: flex;
+    align-items: center;
+    padding: 14px 4px;
+    border-top: 1px solid var(--card-border);
+    gap: 12px;
+  }
+  .size-item .dim{
+    flex: 1;
+    font-weight: 700;
+    font-size: 20px;
+    white-space: nowrap;
+  }
+  .size-item .dim span{ color: var(--ink-soft); font-weight: 500; font-size: 14px; margin-left: 2px; }
+
+  .stepper{ display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+  .stepper button{
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    border: none;
+    font-size: 21px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--ink);
+    background: rgba(31,39,51,0.08);
+    flex: 0 0 auto;
+  }
+  .stepper button.plus{
+    background: var(--accent);
+    color: #fff;
+  }
+  .stepper .count{
+    font-weight: 900;
+    font-size: 20px;
+    min-width: 30px;
+    text-align: center;
+  }
+  .row-del{
+    flex: 0 0 auto;
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: rgba(192,71,47,0.08);
+    border: none;
+    color: #C0472F;
+    font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+
+  .size-list{ margin-top: 14px; }
+
+  .calc-toggle{
+    display: flex;
+    background: var(--accent-soft);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+    margin-bottom: 10px;
+  }
+  .calc-toggle button{
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .calc-toggle button.active{
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .roll-fields{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .roll-field{
+    flex: 1;
+    min-width: 0;
+  }
+  .roll-field label{
+    display: block;
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .roll-field label span{ font-weight: 400; margin-left: 3px; }
+  .roll-field input, .roll-field select{
+    width: 100%;
+    border: 1.5px solid var(--card-border);
+    background: #FAFBFD;
+    border-radius: 9px;
+    padding: 10px 6px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--ink);
+  }
+  .roll-field input:focus, .roll-field select:focus{ outline: none; border-color: var(--accent); }
+
+  .roll-result{
+    background: var(--accent-soft);
+    color: var(--navy);
+    font-size: 12.5px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+  .roll-result b{ font-size: 15px; }
+
+  .panel-empty{
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    padding: 8px 4px;
+  }
+
+  .clear-slot{
+    display: block;
+    margin-top: 4px;
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .add-slot-btn{
+    width: 100%;
+    border: 1.5px dashed #B9C3D3;
+    background: transparent;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 13px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 6px;
+  }
+
+  /* summary */
+  .summary-card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 4px 4px 12px;
+    margin-bottom: 16px;
+  }
+  .summary-head{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 12px 8px;
+  }
+  .summary-head b{ flex: 1; font-size: 14.5px; }
+  .summary-total{
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 700;
+  }
+  table.sum-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  table.sum-table th{
+    text-align: left;
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 700;
+    padding: 4px 12px;
+    border-bottom: 1px solid var(--card-border);
+  }
+  table.sum-table td{
+    padding: 8px 12px;
+    border-bottom: 1px solid #F0F2F6;
+  }
+  table.sum-table td.num{ text-align: right; font-weight: 700; }
+  table.sum-table tr:last-child td{ border-bottom: none; }
+
+  .copy-btn{
+    margin: 10px 12px 2px;
+    width: calc(100% - 24px);
+    border: none;
+    background: var(--good);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 11px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .copy-btn.copied{ background: #1F7A50; }
+
+  .empty-note{
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    padding: 10px 12px 14px;
+  }
+
+  /* site switch overlay */
+  .overlay{
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(18,35,62,0.45);
+    z-index: 50;
+    align-items: flex-end;
+  }
+  .overlay.open{ display: flex; }
+  .sheet{
+    background: #fff;
+    width: 100%;
+    max-height: 78vh;
+    overflow-y: auto;
+    border-radius: 18px 18px 0 0;
+    padding: 16px 14px 20px;
+  }
+  .sheet-title{ font-size: 15px; font-weight: 900; margin-bottom: 10px; font-family: 'Zen Kaku Gothic New', sans-serif; }
+  .site-list-item{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 10px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+  .site-list-item:active{ background: var(--accent-soft); }
+  .site-list-item .name{ font-weight: 700; font-size: 14.5px; }
+  .site-list-item .meta{ font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .site-list-item .cur{ color: var(--accent); font-size: 11.5px; font-weight: 700; }
+  .site-del{ background: none; border: none; color: #C0472F; font-size: 12px; padding: 6px; }
+  .new-site-btn{
+    width: 100%;
+    border: none;
+    background: var(--navy);
+    color: #fff;
+    font-weight: 700;
+    padding: 13px;
+    border-radius: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .sheet-close{
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    padding: 10px;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="kicker">SITE TALLY</span>
+  <h1>現場採寸カウンター</h1>
+  <div class="site-row">
+    <input id="siteName" placeholder="現場名を入力">
+    <button class="icon-btn" onclick="openSiteSheet()" title="現場を切替">☰</button>
+  </div>
+  <div class="mode-toggle">
+    <button id="modeRoomBtn" onclick="setMode('room')">部屋ごと</button>
+    <button id="modeItemBtn" onclick="setMode('item')">品番ごと</button>
+  </div>
+</header>
+
+<main>
+  <div class="section-title">採寸入力</div>
+  <div id="slotList"></div>
+  <button class="add-slot-btn" id="addSlotBtn" onclick="addSlot()">＋ 部屋を追加</button>
+
+  <div class="section-title">全体まとめ</div>
+  <div id="summaryArea"></div>
+</main>
+
+<div class="overlay" id="siteOverlay" onclick="if(event.target===this) closeSiteSheet()">
+  <div class="sheet">
+    <div class="sheet-title">現場を選択</div>
+    <div id="siteListArea"></div>
+    <button class="new-site-btn" onclick="createSite()">＋ 新しい現場を作成</button>
+    <button class="sheet-close" onclick="closeSiteSheet()">閉じる</button>
+  </div>
+</div>
+
+<script>
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(e){
+  const now = Date.now();
+  if(now - lastTouchEnd <= 350){ e.preventDefault(); }
+  lastTouchEnd = now;
+}, { passive: false });
+
+const STORE_KEY = 'onsite-tally-v1';
+let app = { currentSiteId: null, sites: {} };
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+const DEFAULT_SLOT_COUNT = 5;
+
+function makeSlot(){
+  return { id: uid(), room: "", expanded: false, sizes: [], calcMode: 'count', repeat: 0, lossRate: 0, itemL: 500, itemW: 500 };
+}
+
+function emptySlots(n){
+  return Array.from({length: n}, () => makeSlot());
+}
+
+function newSite(name){
+  return { id: uid(), name: name || "", mode: 'room', slots: emptySlots(DEFAULT_SLOT_COUNT), updatedAt: Date.now() };
+}
+
+function curSite(){ return app.sites[app.currentSiteId]; }
+
+async function load(){
+  try{
+    const res = await window.storage.get(STORE_KEY);
+    if(res && res.value) app = JSON.parse(res.value);
+  }catch(e){ /* first run */ }
+
+  if(!app.sites) app.sites = {};
+  if(!app.currentSiteId || !app.sites[app.currentSiteId]){
+    const ids = Object.keys(app.sites);
+    if(ids.length > 0){
+      app.currentSiteId = ids.sort((a,b)=>app.sites[b].updatedAt - app.sites[a].updatedAt)[0];
+    } else {
+      const s = newSite("");
+      app.sites[s.id] = s;
+      app.currentSiteId = s.id;
+    }
+  }
+  renderAll();
+}
+
+async function save(){
+  curSite().updatedAt = Date.now();
+  try{ await window.storage.set(STORE_KEY, JSON.stringify(app)); }
+  catch(e){ console.error('save failed', e); }
+}
+
+document.getElementById('siteName').addEventListener('input', e=>{
+  curSite().name = e.target.value;
+  save();
+});
+
+function setMode(m){
+  const site = curSite();
+  site.mode = m;
+  // 「部屋ごと」モードに切り替えた場合は、計算モードを強制的に 'count' にリセットする
+  if(m === 'room'){
+    site.slots.forEach(slot => { slot.calcMode = 'count'; });
+  }
+  save();
+  renderAll();
+}
+
+function addSlot(){
+  const s = makeSlot();
+  s.expanded = true;
+  curSite().slots.push(s);
+  save();
+  renderAll();
+}
+
+function removeSlot(slotId){
+  if(!confirm('このスロットを削除します。よろしいですか？')) return;
+  curSite().slots = curSite().slots.filter(s => s.id !== slotId);
+  save();
+  renderAll();
+}
+
+function toggleExpand(slotId){
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  slot.expanded = !slot.expanded;
+  save();
+  renderAll();
+}
+
+function updateRoom(slotId, val){
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  slot.room = val;
+  save();
+  renderSummaryOnly();
+  updateBadge(slotId);
+}
+
+function addSize(slotId){
+  const input = document.getElementById('sizeInput-' + slotId);
+  const val = input.value.trim();
+  if(!val) return;
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  let row = slot.sizes.find(s => s.size === val);
+  if(row){ row.count += 1; }
+  else{ slot.sizes.push({ id: uid(), size: val, count: 1 }); }
+  input.value = "";
+  input.focus();
+  save();
+  renderAll();
+}
+
+function addPieceSize(slotId){
+  const inputX = document.getElementById('sizeInputX-' + slotId);
+  const inputY = document.getElementById('sizeInputY-' + slotId);
+  const valX = inputX.value.trim();
+  const valY = inputY.value.trim();
+  if(!valX || !valY) return;
+  
+  const sizeStr = valX + '×' + valY;
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  
+  let row = slot.sizes.find(s => s.size === sizeStr);
+  if(row){ row.count += 1; }
+  else{ slot.sizes.push({ id: uid(), size: sizeStr, count: 1 }); }
+  
+  inputX.value = "";
+  inputY.value = "";
+  inputX.focus();
+  save();
+  renderAll();
+}
+
+function changeCount(slotId, rowId, delta){
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  const row = slot.sizes.find(s => s.id === rowId);
+  if(!row) return;
+  row.count = Math.max(0, row.count + delta);
+  save();
+  renderAll();
+}
+
+function deleteRow(slotId, rowId){
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  slot.sizes = slot.sizes.filter(s => s.id !== rowId);
+  save();
+  renderAll();
+}
+
+function setCalcMode(slotId, mode){
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  slot.calcMode = mode;
+  save();
+  renderAll();
+}
+
+function updateRepeat(slotId, val){
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  slot.repeat = Math.max(0, Number(val) || 0);
+  save();
+  renderAll();
+}
+
+function updateLossRate(slotId, val){
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  slot.lossRate = Number(val) || 0;
+  save();
+  renderAll();
+}
+
+function updateItemDim(slotId, axis, val){
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  if(axis === 'L') slot.itemL = Math.max(1, Number(val) || 500);
+  if(axis === 'W') slot.itemW = Math.max(1, Number(val) || 500);
+  save();
+  renderAll();
+}
+
+function computeLengthResult(slot){
+  const repeat = slot.repeat || 0;
+  const lossRate = slot.lossRate || 0;
+  let totalMm = 0;
+  slot.sizes.forEach(s=>{
+    const dim = Number(s.size) || 0;
+    const perUnit = repeat > 0 ? Math.ceil(dim / repeat) * repeat : dim;
+    totalMm += perUnit * s.count;
+  });
+  const totalWithLossM = (totalMm * (1 + lossRate/100)) / 1000;
+  const orderMeter = Math.ceil(totalWithLossM * 10) / 10;
+  return { totalMm, totalWithLossM, orderMeter };
+}
+
+function computePieceResult(slot){
+  const itemL = Number(slot.itemL) || 500;
+  const itemW = Number(slot.itemW) || 500;
+  let totalPieces = 0;
+  
+  slot.sizes.forEach(s => {
+    const parts = String(s.size).split('×');
+    if(parts.length === 2) {
+      const roomL = Number(parts[0]) || 0;
+      const roomW = Number(parts[1]) || 0;
+      const countL = Math.ceil(roomL / itemL);
+      const countW = Math.ceil(roomW / itemW);
+      totalPieces += (countL * countW) * s.count;
+    }
+  });
+  return totalPieces;
+}
+
+function clearSlot(slotId){
+  if(!confirm('この行の内容を消します。よろしいですか？')) return;
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  slot.room = "";
+  slot.sizes = [];
+  save();
+  renderAll();
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function updateBadge(slotId){
+  const slot = curSite().slots.find(s=>s.id===slotId);
+  const totalCount = slot.sizes.reduce((sum,s)=>sum+s.count,0);
+  const el = document.getElementById('badge-' + slotId);
+  if(!el) return;
+
+  const site = curSite();
+  if(site.mode === 'item' && slot.calcMode === 'meter'){
+    const meter = computeLengthResult(slot);
+    el.textContent = meter.orderMeter > 0 ? '発注' + meter.orderMeter.toFixed(1) + 'm' : (totalCount > 0 ? '計算中' : '');
+  } else if(site.mode === 'item' && slot.calcMode === 'piece'){
+    const pieces = computePieceResult(slot);
+    el.textContent = pieces > 0 ? '発注' + pieces + '枚' : (totalCount > 0 ? '計算中' : '');
+  } else {
+    el.textContent = totalCount > 0 ? totalCount + '本' : '';
+  }
+}
+
+function renderAll(){
+  const site = curSite();
+  document.getElementById('siteName').value = site.name || "";
+  document.getElementById('modeRoomBtn').classList.toggle('active', site.mode === 'room');
+  document.getElementById('modeItemBtn').classList.toggle('active', site.mode === 'item');
+  document.getElementById('siteName').placeholder = site.mode === 'item' ? '現場名を入力（品番モード）' : '現場名を入力';
+
+  const placeholderText = site.mode === 'item' ? '品番を入力' : '部屋名を入力';
+  document.getElementById('addSlotBtn').textContent = site.mode === 'item' ? '＋ 品番を追加' : '＋ 部屋を追加';
+
+  const list = document.getElementById('slotList');
+  if(site.slots.length === 0){
+    list.innerHTML = '<div class="empty-note">「＋ 部屋・品番を追加」から始めてください</div>';
+  } else {
+    list.innerHTML = site.slots.map((slot, i) => {
+      const totalCount = slot.sizes.reduce((sum,s)=>sum+s.count,0);
+      let badgeText = '';
+      
+      if (site.mode === 'item' && slot.calcMode === 'meter') {
+        const meter = computeLengthResult(slot);
+        badgeText = meter.orderMeter > 0 ? '発注' + meter.orderMeter.toFixed(1) + 'm' : (totalCount > 0 ? '計算中' : '');
+      } else if (site.mode === 'item' && slot.calcMode === 'piece') {
+        const pieces = computePieceResult(slot);
+        badgeText = pieces > 0 ? '発注' + pieces + '枚' : (totalCount > 0 ? '計算中' : '');
+      } else {
+        badgeText = totalCount > 0 ? totalCount + '本' : '';
+      }
+
+      const sizesHtml = slot.sizes.length === 0
+        ? '<div class="panel-empty">まだサイズが登録されていません</div>'
+        : slot.sizes.map(s => `
+            <div class="size-item">
+              <button class="row-del" onclick="deleteRow('${slot.id}', '${s.id}')">✕</button>
+              <span class="dim">${escapeHtml(s.size)}<span>mm</span></span>
+              <div class="stepper">
+                <button onclick="changeCount('${slot.id}', '${s.id}', -1)">－</button>
+                <span class="count">${s.count}</span>
+                <button class="plus" onclick="changeCount('${slot.id}', '${s.id}', 1)">＋</button>
+              </div>
+            </div>
+          `).join('');
+
+      const lossOptions = [0,3,5,8,10].map(v =>
+        `<option value="${v}" ${slot.lossRate===v?'selected':''}>${v}%</option>`
+      ).join('');
+
+      // 「品番ごと」モードの時のみ計算切り替えUIや専用フィールドを表示する
+      const calcToggleHtml = (site.mode === 'item') ? `
+        <div class="calc-toggle">
+          <button class="${slot.calcMode==='count'?'active':''}" onclick="setCalcMode('${slot.id}','count')">本数のみ</button>
+          <button class="${slot.calcMode==='meter'?'active':''}" onclick="setCalcMode('${slot.id}','meter')">ｍ計算</button>
+          <button class="${slot.calcMode==='piece'?'active':''}" onclick="setCalcMode('${slot.id}','piece')">枚数計算</button>
+        </div>
+      ` : '';
+
+      const meterFieldsHtml = (site.mode === 'item' && slot.calcMode === 'meter') ? `
+        <div class="roll-fields">
+          <div class="roll-field">
+            <label>リピート(mm)<span>柄なしは0</span></label>
+            <input type="number" inputmode="numeric" value="${slot.repeat || 0}" onchange="updateRepeat('${slot.id}', this.value)">
+          </div>
+          <div class="roll-field">
+            <label>ロス率</label>
+            <select onchange="updateLossRate('${slot.id}', this.value)">${lossOptions}</select>
+          </div>
+        </div>
+        <div class="roll-result">
+          必要長さ ${computeLengthResult(slot).totalWithLossM.toFixed(2)}m（ロス込）
+          → <b>発注数量 ${computeLengthResult(slot).orderMeter.toFixed(1)} m</b>
+        </div>
+      ` : '';
+      
+      const pieceFieldsHtml = (site.mode === 'item' && slot.calcMode === 'piece') ? `
+        <div class="roll-fields">
+          <div class="roll-field">
+            <label>製品タテ(mm)</label>
+            <input type="number" inputmode="numeric" value="${slot.itemL || 500}" onchange="updateItemDim('${slot.id}', 'L', this.value)">
+          </div>
+          <div class="roll-field">
+            <label>製品ヨコ(mm)</label>
+            <input type="number" inputmode="numeric" value="${slot.itemW || 500}" onchange="updateItemDim('${slot.id}', 'W', this.value)">
+          </div>
+        </div>
+        <div class="roll-result">
+          割付結果に基づく必要枚数
+          → <b>発注数量 ${computePieceResult(slot)} 枚</b>
+        </div>
+      ` : '';
+      
+      const addRowHtml = (site.mode === 'item' && slot.calcMode === 'piece') ? `
+        <div class="add-row">
+          <div class="piece-inputs">
+            <input id="sizeInputX-${slot.id}" type="number" inputmode="numeric" placeholder="部屋タテ">
+            <span style="color:var(--ink-soft);font-weight:900;">×</span>
+            <input id="sizeInputY-${slot.id}" type="number" inputmode="numeric" placeholder="部屋ヨコ"
+                   onkeydown="if(event.key==='Enter') addPieceSize('${slot.id}')">
+          </div>
+          <button onclick="addPieceSize('${slot.id}')">＋ 追加</button>
+        </div>
+      ` : `
+        <div class="add-row">
+          <input id="sizeInput-${slot.id}" type="number" inputmode="numeric" placeholder="寸法(mm)例: 2400"
+                 onkeydown="if(event.key==='Enter') addSize('${slot.id}')">
+          <button onclick="addSize('${slot.id}')">＋ 追加</button>
+        </div>
+      `;
+
+      return `
+        <div class="slot">
+          <div class="slot-head">
+            <button class="del-btn" onclick="removeSlot('${slot.id}')">✕</button>
+            <span class="slot-num">${i+1}</span>
+            <input type="text" inputmode="text" autocomplete="off" value="${escapeHtml(slot.room)}" placeholder="${placeholderText}"
+                   oninput="updateRoom('${slot.id}', this.value)">
+            <span class="slot-count-badge" id="badge-${slot.id}">${badgeText}</span>
+            <button class="expand-btn ${slot.expanded ? 'open' : ''}" onclick="toggleExpand('${slot.id}')">▼</button>
+          </div>
+          <div class="panel ${slot.expanded ? 'open' : ''}">
+            ${calcToggleHtml}
+            ${meterFieldsHtml}
+            ${pieceFieldsHtml}
+            ${addRowHtml}
+            <div class="size-list">${sizesHtml}</div>
+            <button class="clear-slot" onclick="clearSlot('${slot.id}')">この行をクリア</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderSummaryOnly();
+}
+
+function buildSummary(){
+  const site = curSite();
+  const map = new Map();
+  site.slots.forEach(slot=>{
+    const label = (slot.room || '').trim();
+    if(!label) return;
+
+    if(site.mode === 'item' && slot.calcMode === 'meter'){
+      const meter = computeLengthResult(slot);
+      if(meter.orderMeter <= 0) return;
+      const key = label + '|METER';
+      if(!map.has(key)) map.set(key, { label, size: 'ｍ計算', count: 0, unit: 'm' });
+      map.get(key).count += meter.orderMeter;
+    } else if(site.mode === 'item' && slot.calcMode === 'piece'){
+      const pieces = computePieceResult(slot);
+      if(pieces <= 0) return;
+      const key = label + '|PIECE';
+      if(!map.has(key)) map.set(key, { label, size: '枚数(割付)計算', count: 0, unit: '枚' });
+      map.get(key).count += pieces;
+    } else {
+      slot.sizes.forEach(s=>{
+        if(s.count <= 0) return;
+        const key = label + '|' + s.size + '|' + slot.calcMode;
+        if(!map.has(key)) map.set(key, { label, size: s.size, count: 0, unit: '本' });
+        map.get(key).count += s.count;
+      });
+    }
+  });
+  return Array.from(map.values());
+}
+
+function renderSummaryOnly(){
+  const site = curSite();
+  const rows = buildSummary();
+  const area = document.getElementById('summaryArea');
+  const grandTotal = rows.reduce((sum,r)=>sum+r.count,0);
+  const labelHeader = site.mode === 'item' ? '品番' : '部屋名';
+
+  if(rows.length === 0){
+    area.innerHTML = '<div class="summary-card"><div class="empty-note">サイズを登録すると、ここに全体の合計が表示されます</div></div>';
+    return;
+  }
+
+  const tableRows = rows.map(r => {
+    const valDisplay = r.unit === 'm' ? r.count.toFixed(1) : r.count;
+    let sizeDisplay = escapeHtml(r.size);
+    
+    if (r.unit === '本') {
+      sizeDisplay += '<span style="color:var(--ink-soft);font-weight:500;font-size:11.5px;"> mm</span>';
+    } else if (r.unit === 'm') {
+      sizeDisplay = '<span style="color:var(--accent);font-weight:700;">ｍ計算</span>';
+    } else if (r.unit === '枚') {
+      sizeDisplay = '<span style="color:var(--accent);font-weight:700;">枚数計算</span>';
+    }
+
+    return `
+      <tr>
+        <td>${escapeHtml(r.label)}</td>
+        <td>${sizeDisplay}</td>
+        <td class="num">${valDisplay}<span style="color:var(--ink-soft);font-weight:500;font-size:11.5px;"> ${r.unit}</span></td>
+      </tr>
+    `;
+  }).join('');
+
+  const copyBtn = site.mode === 'item'
+    ? `<button class="copy-btn" id="copyBtn" onclick="copyForOrder()">MARUWA ORDER用にコピー</button>`
+    : '';
+
+  area.innerHTML = `
+    <div class="summary-card">
+      <div class="summary-head">
+        <b>合計 ${rows.length}件</b>
+        <span class="summary-total">総数 ${grandTotal.toFixed(grandTotal % 1 === 0 ? 0 : 1)}</span>
+      </div>
+      <table class="sum-table">
+        <thead><tr><th>${labelHeader}</th><th>サイズ</th><th style="text-align:right">数量</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+      ${copyBtn}
+    </div>
+  `;
+}
+
+async function copyForOrder(){
+  const rows = buildSummary();
+  const text = rows.map(r => `${r.label}\t${r.size}\t${r.count}`).join('\n');
+  try{
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'コピーしました！';
+    btn.classList.add('copied');
+    setTimeout(()=>{
+      btn.textContent = 'MARUWA ORDER用にコピー';
+      btn.classList.remove('copied');
+    }, 1600);
+  }catch(e){
+    alert('コピーに失敗しました。手動で選択してください。');
+  }
+}
+
+function openSiteSheet(){
+  const area = document.getElementById('siteListArea');
+  const sites = Object.values(app.sites).sort((a,b)=>b.updatedAt - a.updatedAt);
+  area.innerHTML = sites.map(s=>{
+    const isCur = s.id === app.currentSiteId;
+    return `
+      <div class="site-list-item" onclick="switchSite('${s.id}')">
+        <div>
+          <div class="name">${escapeHtml(s.name || '（無題の現場）')}</div>
+          <div class="meta">${s.slots.length}スロット ${isCur ? '<span class="cur">・表示中</span>' : ''}</div>
+        </div>
+        <button class="site-del" onclick="event.stopPropagation(); deleteSite('${s.id}')">削除</button>
+      </div>
+    `;
+  }).join('') || '<div class="empty-note">現場がありません</div>';
+  document.getElementById('siteOverlay').classList.add('open');
+}
+function closeSiteSheet(){
+  document.getElementById('siteOverlay').classList.remove('open');
+}
+function switchSite(id){
+  app.currentSiteId = id;
+  save();
+  renderAll();
+  closeSiteSheet();
+}
+function createSite(){
+  const s = newSite("");
+  app.sites[s.id] = s;
+  app.currentSiteId = s.id;
+  save();
+  renderAll();
+  closeSiteSheet();
+}
+function deleteSite(id){
+  if(Object.keys(app.sites).length <= 1){
+    alert('最後の1件は削除できません。');
+    return;
+  }
+  if(!confirm('この現場を削除します。よろしいですか？')) return;
+  delete app.sites[id];
+  if(app.currentSiteId === id){
+    app.currentSiteId = Object.keys(app.sites).sort((a,b)=>app.sites[b].updatedAt - app.sites[a].updatedAt)[0];
+  }
+  save();
+  renderAll();
+  openSiteSheet();
+}
+
+load();
+</script>
+</body>
+</html>
